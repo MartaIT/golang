@@ -1,0 +1,6 @@
+[build]
+builder = "heroku/buildpacks:20"
+buildCommand = "go build -o myapp ."
+
+[deploy]
+startCommand = "./myapp"

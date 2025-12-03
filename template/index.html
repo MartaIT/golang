@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Mahasiswa - Go + Bootstrap</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/">Go-Bootstrap CRUD dengan MySQL</a>
+  </div>
+</nav>
+
+<div class="container mt-5">
+  <h3 class="mb-4 text-primary">📘 Data Mahasiswa</h3>
+
+  <!-- 🔹 Form Tambah/Edit -->
+  <form id="formMahasiswa" class="card p-3 mb-4">
+    <input type="hidden" id="id">
+    <div class="row g-3">
+      <div class="col-md-3"><input type="text" id="nim" class="form-control" placeholder="NIM" required></div>
+      <div class="col-md-3"><input type="text" id="nama" class="form-control" placeholder="Nama" required></div>
+      <div class="col-md-3"><input type="text" id="prodi" class="form-control" placeholder="Program Studi" required></div>
+      <div class="col-md-3"><input type="email" id="email" class="form-control" placeholder="Email" required></div>
+    </div>
+    <div class="mt-3">
+      <button class="btn btn-success" type="submit">💾 Simpan</button>
+      <button class="btn btn-secondary" type="button" id="resetBtn">🔄 Reset</button>
+    </div>
+  </form>
+
+  <!-- 🔹 Tabel Data -->
+  <table class="table table-bordered table-hover">
+    <thead class="table-primary text-center">
+      <tr>
+        <th>ID</th>
+        <th>NIM</th>
+        <th>Nama</th>
+        <th>Prodi</th>
+        <th>Email</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody id="tableMahasiswa">
+      <tr><td colspan="6" class="text-center">Memuat data...</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+const API_URL = '/api/mahasiswa';
+
+async function loadData() {
+  const res = await fetch(API_URL);
+  const data = await res.json();
+  const tbody = document.getElementById('tableMahasiswa');
+  tbody.innerHTML = '';
+
+  data.forEach(m => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${m.id}</td>
+        <td>${m.nim}</td>
+        <td>${m.nama}</td>
+        <td>${m.prodi}</td>
+        <td>${m.email}</td>
+        <td class="text-center">
+          <button class="btn btn-sm btn-warning" onclick="editData(${m.id}, '${m.nim}', '${m.nama}', '${m.prodi}', '${m.email}')">✏️</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteData(${m.id})">🗑️</button>
+        </td>
+      </tr>`;
+  });
+}
+
+document.getElementById('formMahasiswa').addEventListener('submit', async e => {
+  e.preventDefault();
+
+  const id = document.getElementById('id').value;
+  const m = {
+    nim: document.getElementById('nim').value,
+    nama: document.getElementById('nama').value,
+    prodi: document.getElementById('prodi').value,
+    email: document.getElementById('email').value
+  };
+
+  const method = id ? 'PUT' : 'POST';
+  const url = id ? `${API_URL}/${id}` : API_URL;
+
+  await fetch(url, {
+    method: method,
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(m)
+  });
+
+  resetForm();
+  loadData();
+});
+
+function editData(id, nim, nama, prodi, email) {
+  document.getElementById('id').value = id;
+  document.getElementById('nim').value = nim;
+  document.getElementById('nama').value = nama;
+  document.getElementById('prodi').value = prodi;
+  document.getElementById('email').value = email;
+}
+
+function deleteData(id) {
+  if (confirm('Yakin ingin menghapus data ini?')) {
+    fetch(`${API_URL}/${id}`, { method: 'DELETE' })
+      .then(() => loadData());
+  }
+}
+
+function resetForm() {
+  document.getElementById('formMahasiswa').reset();
+  document.getElementById('id').value = '';
+}
+
+document.getElementById('resetBtn').addEventListener('click', resetForm);
+
+loadData();
+</script>
+
+</body>
+</html>
