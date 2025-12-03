@@ -1,6 +1,5 @@
 [build]
-builder = "heroku/buildpacks:20"
-buildCommand = "go build -o myapp ."
+builder = "NIXPACKS"
 
-[deploy]
-startCommand = "./myapp"
+[start]
+cmd = "go run main.go"
